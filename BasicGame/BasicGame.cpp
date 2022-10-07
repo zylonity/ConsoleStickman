@@ -1,25 +1,26 @@
-#include <windows.h>
+#include <windows.h> //adds all the functions that let me control and measure the console window
 #include <conio.h> //library that lets me detect input
 #include <iostream>
 #include <iomanip> //setw and setfill
 #include <stdio.h>
 
 
+//defining keycodes for readability
 #define KEY_SPACE 32
 #define KEY_LEFT 75
 #define KEY_RIGHT 77
 
 using namespace std;
 
+
+//added a struct to hold X and Y coordinates
 struct Vector2
 {
 	int x;
 	int y;
 };
 
-
-
-
+//This 2D array holds the basic stickman's "model"
 char characterModel[9][7] = {
 	{' ', ' ', ' ', 'X', ' ', ' ', ' '},
 	{' ', 'X', ' ', ' ', ' ', 'X', ' '},
@@ -33,16 +34,16 @@ char characterModel[9][7] = {
 };
 
 
-
+//This grabs the current coordinates of the console's cursor
 Vector2 cursorCoords() {
 	
 	Vector2 tempCoord;
 	
-	CONSOLE_SCREEN_BUFFER_INFO csbi;
+	CONSOLE_SCREEN_BUFFER_INFO csbi; //This contains info about the window size and cursor's position
 	
 	GetConsoleScreenBufferInfo(GetStdHandle(STD_OUTPUT_HANDLE), &csbi);
 
-	tempCoord.x = csbi.dwCursorPosition.X;
+	tempCoord.x = csbi.dwCursorPosition.X; //dwCursorPosition is just the cursor's location
 	tempCoord.y = csbi.dwCursorPosition.Y;
 
 
@@ -52,7 +53,8 @@ Vector2 cursorCoords() {
 
 
 
-
+//This gets the dimension of the console's window
+//Uses CONSOLE_SCREEN_BUFFER_INFO like in cursorCoords()
 Vector2 consoleDimensions() {
 
 	Vector2 result;
@@ -72,7 +74,7 @@ Vector2 consoleDimensions() {
 
 
 
-
+//Function to control the coordinates of the cursor using my Vector2 struct
 void moveCursor(Vector2 pos) {
 
 	COORD coord;
@@ -82,35 +84,33 @@ void moveCursor(Vector2 pos) {
 }
 
 
-
-
-
 void drawPlayer() {
 
+	//Grab the coordinates of the current cursor's position
 	Vector2 setCursor;
 	setCursor.x = cursorCoords().x;
 	setCursor.y = cursorCoords().y;
 	
+	//Cycle through the 2D array and print each character
 	for (int k = 0; k < 9; k++) {
 		for (int l = 0; l < 7; l++) {
 			cout << characterModel[k][l];
 
 		}
 		setCursor.y += 1;
-		moveCursor(setCursor);
+		moveCursor(setCursor); //Reset the cursor's position to the beginning of the next line (instead of the next character)
 
 	}
 	
+	//Once the character is drawn, reset the cursor's position to the top left corner of the character
 	setCursor.y -= 9;
 	
 	moveCursor(setCursor);
 	
 }
 
-
-
-
-
+//Clear the player's character
+//Similar to drawing it
 void clearPlayer() {
 	
 	Vector2 setCursor;
@@ -131,13 +131,14 @@ void clearPlayer() {
 
 
 
-
-
+//Move the player by clearing it, moving the cursor by 1, and drawing it again
 int movePlayer(int key) {
 	
 	Vector2 tempPos = cursorCoords();
 	
-	switch (key) { //tells me the keycode of what i press
+
+	//Handle keyboard input
+	switch (key) {
 	case KEY_RIGHT:
 		clearPlayer();
 		tempPos.x += 1;
@@ -160,11 +161,11 @@ int movePlayer(int key) {
 
 
 
-
+//Set the start coordinates of the cursor depending on the size of the window
 int setStartCoords() {
 	
-	int xPos = consoleDimensions().x * 0.25f;
-	int yPos = (consoleDimensions().y * 0.75f) - 9;
+	int xPos = consoleDimensions().x * 0.25f;			//uses the first 25% of the window size for the X pos
+	int yPos = (consoleDimensions().y * 0.75f) - 9;		//uses the same 25% as the floor, and then goes up by 9 to account for the height of the character
 	
 
 	Vector2 coords;
@@ -191,7 +192,7 @@ int drawFloor() {
 		
 		if (i == whereToDraw) {
 
-			for (int j = 0; j < consoleDimensions().x; j++) {			//draws the floor according to the window size
+			for (int j = 0; j < consoleDimensions().x; j++) {			//draws the floor according to the window' size's X size
 				cout << '_';
 			}
 			
